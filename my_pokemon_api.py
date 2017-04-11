@@ -1,4 +1,3 @@
-#!/user/bin/env python
 import os
 import sys
 import json
@@ -7,6 +6,7 @@ import pprint
 import logging
 import getpass
 import argparse
+import boto3
 
 import s2sphere
 from s2sphere import CellId, math
@@ -14,6 +14,8 @@ from s2sphere import CellId, math
 from mock_pgoapi import mock_pgoapi as pgoapi
 
 log = logging.getLogger(__name__)
+
+SQS_QUEUE_NAME = "awseb-e-2w3dpbjxyb-stack-AWSEBWorkerQueue-4F80JDPFFGQ7"
 
 # Use s2sphere to get a set of S2 cells at level 15 covering a rectangle in (lat, lng) coordinates    
 def break_down_area_to_cell(north, south, west, east):
@@ -72,20 +74,18 @@ def parse_pokemon(search_response):
 def scan_area(north, south, west, east, api):
     result = []
 	
+        
     # 1. Find all points to search within the area using Google S2
     cell_ids = break_down_area_to_cell(north, south, west, east)
-    #print cell_ids
-	
+    
+    # Get the service resource    
+    work_queue = boto3.resource('sqs', region_name='us-west-2').get_queue_by_name(QueueName=SQS_QUEUE_NAME)
+
     # 2. Search each point, get result from api
     for cell_id in cell_ids: 
-        search_response = search_point(cell_id, api)
-
-        # 3. Parse pokemon info from result
-        pokemons = parse_pokemon(search_response)
- 
-        # 4. Aggregate pokemon info and return
-        result += pokemons
-
+        print cell_id
+        # Send request (cell_ids) to elastic beanstalk worker server
+        work_queue.send_message(MessageBody=json.dumps({"cell_id":cell_id})) 
  
     return result
 
@@ -127,10 +127,7 @@ def init_config():
 
     return config
 
-
-if __name__ == "__main__":
-    config = init_config()
-
+def init_api(config):
     # instantiate pgoapi
     api = pgoapi.PGoApi()
     if config.proxy:
@@ -151,8 +148,17 @@ if __name__ == "__main__":
     # provide the path for your encrypt dll
     api.activate_signature("/home/ubuntu/pgoapi/libencrypt.so")
 
+    return api
+
+
+if __name__ == "__main__":
+    config = init_config()
+    
+    # initialize pgoapi/mock_pgoapi 
+    api = init_api(config)
+
     # Define a rectangle area with the coordinates of 4 corners on the map
     # Point 1: 40.7665138,-74.0003176
     # Point 2: 40.7473342,-73.987958
-    print scan_area(40.7565138, 40.7473342, -74.0003176, -73.997958, api)
+    print scan_area(41.8565138, 40.7473342, -74.0003176, -73.997958, api)
 	
