@@ -26,8 +26,8 @@ def break_down_area_to_cell(north, south, west, east):
     # set level to 15 to meet the requirement of Pokemon Go
     region.min_level = 15
     region.max_level = 15
-    p1 = s2sphere.LatLng.from_degrees(north, west) # set upper left corner 
-    p2 = s2sphere.LatLng.from_degrees(south, east) # set bottom right corner 
+    p1 = s2sphere.LatLng.from_degrees(north, west) # set upper-left corner 
+    p2 = s2sphere.LatLng.from_degrees(south, east) # set bottom-right corner 
     cell_ids = region.get_covering(s2sphere.LatLngRect.from_point_pair(p1, p2))
 
     # convert hex cell_ids to decimal and add to result
