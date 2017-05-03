@@ -15,7 +15,7 @@ from mock_pgoapi import mock_pgoapi as pgoapi
 
 log = logging.getLogger(__name__)
 
-SQS_QUEUE_NAME = "awseb-e-2w3dpbjxyb-stack-AWSEBWorkerQueue-4F80JDPFFGQ7"
+SQS_QUEUE_NAME = "awseb-e-k4gwgatxz5-stack-AWSEBWorkerQueue-12UE2BKTWF3SW"
 
 # Use s2sphere to get a set of S2 cells at level 15 covering a rectangle in (lat, lng) coordinates    
 def break_down_area_to_cell(north, south, west, east):
