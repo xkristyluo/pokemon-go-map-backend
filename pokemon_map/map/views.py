@@ -77,7 +77,7 @@ def pokemons(request):
 
     return HttpResponse(json.dumps(result))
 '''
-
+import os
 import logging
 import json
 
@@ -89,7 +89,7 @@ from django.http import HttpResponse
 
 from db_accessor import get_pokemons_from_db 
 
-SQS_QUEUE_NAME = "awseb-e-k4gwgatxz5-stack-AWSEBWorkerQueue-12UE2BKTWF3SW"
+SQS_QUEUE_NAME = os.environ["SQS_NAME"]
 
 def break_down_area_to_cell(north, south, west, east):
     """ Return a list of s2 cell id """

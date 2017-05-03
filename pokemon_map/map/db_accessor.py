@@ -1,14 +1,15 @@
+import os
 import time
 import psycopg2
 
 # SELECT expire,pokemon_id, latitude, longitude FROM pokemon_map WHERE longitude > west  AND longitude < east  AND latitude > south AND latitude < north AND expire > current time in ms since the epoch LIMIT 100
 def get_pokemons_from_db(north, south, west, east):
     # 1. Open connection: connect to pokemon_map database
-    conn = psycopg2.connect(host = "week2demo3.cp24vhenjjas.us-west-2.rds.amazonaws.com",
+    conn = psycopg2.connect(host = os.environ["DB_HOST"],
                             port = 5432,
-                            user = "week2demo3",
-                            password = "xluo1984",
-                            database = "week2demo3")
+                            user = os.environ["DB_USER"],
+                            password = os.environ["DB_PASSWORD"],
+                            database = os.environ["DB_DATABASE"])
 
     # 2. Execute SQL: create a cursor to execute database commands and queries
     with conn.cursor() as cur:
