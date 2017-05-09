@@ -1,5 +1,6 @@
 import logging 
 import json
+import redis
 
 from django.shortcuts import render
 
@@ -12,6 +13,15 @@ logger = logging.getLogger("worker")
 
 class Config: 
     pass
+
+def needs_to_crawl(cell_id):
+    redis_client = redis.StrictRedis(host=os.environ["REDIS_HOST"], port=6379, db=0)
+    response = redis_client.get(cell_id)
+    if response == None:
+        redis_client.setex(cell_id, 30, "1")
+        return True
+    else:
+        return False
 
 
 # Create your views here.
@@ -26,6 +36,9 @@ def add_crawl_point(request):
     request_obj = json.loads(request.body)
     cell_id = request_obj["cell_id"]
     
+    # Optimization: check if the  pokemon of the cell_id is cached
+    if not needs_to_crawl(cell_id):
+        return HttpResponse("Skip")
 
     # 2. Call my search api my_pokemon_api.py
     # Initialize config 
